@@ -12,12 +12,15 @@ declare global {
 	}
 	interface Window {
 		ethereum: {
-			chainId: string,
-			on: (event: string, listener: (...args: any[]) => void) => void,
-			isConnected: () => boolean,
-			enable: () => Promise<any>,
-			isMetaMask: boolean,
-			selectedAddress: string,
+			chainId: string
+			on: (event: string, listener: (...args: any[]) => void) => void
+			isConnected: () => boolean
+			enable: () => Promise<any>
+			isMetaMask: boolean
+			_metamask: {
+				isUnlocked(): Promise<boolean>;
+			}
+
 			request: (options: {
 				method: 'eth_sendTransaction' | 'eth_call' | 'eth_requestAccounts' | 'eth_accounts' | 'eth_getBalance',
 				params?: {

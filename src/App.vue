@@ -80,6 +80,11 @@ export default class App extends Vue {
 			return this.$message.warn('Please install MetaMask to use this app.')
 		}
 
+		const isUnlocked = await window.ethereum._metamask.isUnlocked()
+		if (!isUnlocked) {
+			return this.$message.warn('Metamask has been locked, please unlock it.')
+		}
+
 		if (!isNetworkSupported(window.ethereum.chainId)) {
 			return this.$message.error(
 				'Please MetaMask change your network to `Goerli`.'
