@@ -19,7 +19,6 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import { call, Deployment, getAccounts } from '@/utils/eth'
 import Resources, { ResourceBalance } from '@/components/resources.vue'
 import ResourceManager from '@/abi/ResourceManager.json'
 
@@ -43,10 +42,10 @@ export default class Statistics extends Vue {
 	}
 
 	async getBalance() {
-		const accounts = await getAccounts()
-		const result = await call(ResourceManager, 'balances', [
+		const account = await this.getAccount()
+		const result = await this.call(ResourceManager, 'balances', [
 			this.resource.address,
-			accounts[0]
+			account
 		])
 		this.balances = {
 			total: result[0].toString(),

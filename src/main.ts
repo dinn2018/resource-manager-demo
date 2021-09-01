@@ -1,20 +1,33 @@
 import Vue from 'vue'
-import App from './App.vue'
-import router from './router'
+import App from '@/App.vue'
+import router from '@/router'
+import store from '@/store'
 import Antd from 'ant-design-vue'
+import { message } from 'ant-design-vue'
 import 'ant-design-vue/dist/antd.css'
 import '@/style/index.css'
-import { message } from 'ant-design-vue'
-
+import mixin from '@/mixins'
+Vue.mixin(mixin)
 Vue.use(Antd)
 Vue.prototype.$message = message
-message.config({
-	duration: 5,
-})
+Vue.config.productionTip = false;
 
-Vue.config.productionTip = false
-
-new Vue({
-	router,
-	render: (h) => h(App),
-}).$mount('#app')
+(async () => {
+	try {
+		const accounts = await window.ethereum.request({
+			method: 'eth_accounts'
+		})
+		if (accounts.length > 0) {
+			store.init({
+				account: accounts[0],
+				chainId: window.ethereum.chainId
+			})
+		}
+	} finally {
+		new Vue({
+			store,
+			router,
+			render: (h) => h(App),
+		}).$mount('#app')
+	}
+})()

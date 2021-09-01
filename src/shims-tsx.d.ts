@@ -13,6 +13,7 @@ declare global {
 	interface Window {
 		ethereum: {
 			chainId: string,
+			on: (event: string, listener: (...args: any[]) => void) => void,
 			isConnected: () => boolean,
 			enable: () => Promise<any>,
 			isMetaMask: boolean,
@@ -29,5 +30,18 @@ declare global {
 				}[] | any[]
 			}) => Promise<any>
 		}
+	}
+
+	interface Deployment {
+		address: string,
+		abi: any[]
+	}
+
+	interface CallOption {
+		from?: string,
+		to?: string,
+		value?: string,
+		gas?: string,
+		gasPrice?: string
 	}
 }

@@ -67,7 +67,6 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import { sendTransaction, getAccounts } from '@/utils/eth'
 import { Contract, utils, providers } from 'ethers'
 
 import Resources from '@/components/resources.vue'
@@ -119,8 +118,7 @@ export default class StorageOperation extends Vue {
 	data: PinLog[] = []
 
 	async created() {
-		const accounts = await getAccounts()
-		this.buyer = accounts[0]
+		this.buyer = await this.getAccount()
 		await this.filterEvents()
 		this.subscribePin()
 	}
@@ -128,7 +126,7 @@ export default class StorageOperation extends Vue {
 	async pinAdd() {
 		try {
 			const buf = Buffer.from(this.cid)
-			await sendTransaction(StorageManager, 'pinAdd', [
+			await this.sendTransaction(StorageManager, 'pinAdd', [
 				this.buyer,
 				buf,
 				this.deadline
@@ -196,7 +194,7 @@ export default class StorageOperation extends Vue {
 	async pinRemove() {
 		try {
 			const buf = Buffer.from(this.cid)
-			await sendTransaction(StorageManager, 'pinRemove', [this.buyer, buf])
+			await this.sendTransaction(StorageManager, 'pinRemove', [this.buyer, buf])
 		} catch (e) {
 			this.$message.error(JSON.stringify(e))
 		}

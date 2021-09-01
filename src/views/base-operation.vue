@@ -72,7 +72,6 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 import { MaticPOSClient } from '@maticnetwork/maticjs'
-import { sendTransaction, Deployment, getAccounts } from '@/utils/eth'
 import Resources from '@/components/resources.vue'
 import ResourceManager from '@/abi/ResourceManager.json'
 
@@ -91,8 +90,7 @@ export default class BaseOperation extends Vue {
 	proof = ''
 
 	async created() {
-		const accounts = await getAccounts()
-		this.buyer = accounts[0]
+		this.buyer = await this.getAccount()
 	}
 
 	async onResourceChanged(resource: Deployment) {
@@ -101,7 +99,7 @@ export default class BaseOperation extends Vue {
 
 	async spend() {
 		try {
-			await sendTransaction(ResourceManager, 'spend', [
+			await this.sendTransaction(ResourceManager, 'spend', [
 				this.resource.address,
 				this.buyer,
 				this.amount
@@ -113,7 +111,7 @@ export default class BaseOperation extends Vue {
 
 	async spendRollUp() {
 		try {
-			await sendTransaction(ResourceManager, 'spendRollUp', [
+			await this.sendTransaction(ResourceManager, 'spendRollUp', [
 				this.resource.address,
 				this.buyer
 			])
