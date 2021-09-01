@@ -1,13 +1,10 @@
 <template>
 	<div style="width:100%;">
-		<a-form
-			:label-col="{ span: 5 }"
-			:wrapper-col="{ span: 12 }"
-		>
+		<a-form>
 			<a-form-item label="Resource">
 				<Resources @onResourceChanged="onResourceChanged" />
 			</a-form-item>
-			<a-form-item :wrapper-col="{ span: 12, offset: 5 }">
+			<a-form-item>
 				<a-card :bordered="true">
 					<div class="calculation-card">
 						<div>Resource balances total: {{ balances.total }}</div>

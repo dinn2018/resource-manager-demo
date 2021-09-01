@@ -1,9 +1,6 @@
 <template>
 	<div style="width:100%;">
-		<a-form
-			:label-col="{ span: 1 }"
-			:wrapper-col="{ span: 14 }"
-		>
+		<a-form>
 			<a-form-item label="Pin">
 				<a-card :bordered="true">
 					<div
@@ -44,6 +41,25 @@
 						</a-form>
 					</div>
 				</a-card>
+				<a-table
+					:columns="columns"
+					:data-source="data"
+				>
+					<span
+						slot="cid"
+						slot-scope="cid"
+						class="cid"
+					>
+						{{ formatCID(cid) }}
+					</span>
+					<span
+						slot="operation"
+						slot-scope="operation"
+						class="operation"
+					>
+						{{ formatOperation(operation) }}
+					</span>
+				</a-table>
 			</a-form-item>
 		</a-form>
 	</div>
@@ -57,6 +73,13 @@ import { Contract, utils, providers } from 'ethers'
 import Resources from '@/components/resources.vue'
 import StorageManager from '@/abi/StorageManager.json'
 import moment from 'moment'
+
+interface PinLog {
+	buyer: string
+	cid: string
+	cidKey: string
+	operation: number
+}
 @Component({
 	components: {
 		Resources
@@ -70,9 +93,36 @@ export default class StorageOperation extends Vue {
 	txHash = ''
 	proof = ''
 
+	columns = [
+		{
+			title: 'Buyer',
+			dataIndex: 'buyer',
+			fixed: 'left'
+		},
+		{
+			title: 'CID',
+			dataIndex: 'cid',
+			scopedSlots: { customRender: 'cid' }
+		},
+		{
+			title: 'CIDKey',
+			dataIndex: 'cidKey'
+		},
+		{
+			title: 'Operation',
+			dataIndex: 'operation',
+			fixed: 'right',
+			scopedSlots: { customRender: 'operation' }
+		}
+	]
+
+	data: PinLog[] = []
+
 	async created() {
 		const accounts = await getAccounts()
 		this.buyer = accounts[0]
+		await this.filterEvents()
+		this.subscribePin()
 	}
 
 	async pinAdd() {
@@ -85,6 +135,61 @@ export default class StorageOperation extends Vue {
 			])
 		} catch (e) {
 			this.$message.error(JSON.stringify(e))
+		}
+	}
+
+	async subscribePin() {
+		const provider = new providers.Web3Provider(window.ethereum as any)
+		const storageManager = new Contract(
+			StorageManager.address,
+			StorageManager.abi
+		)
+		const filters = storageManager.filters.Pin()
+		const storageInterface = new utils.Interface(StorageManager.abi)
+
+		provider.on(filters, log => {
+			const result = storageInterface.decodeEventLog(
+				'Pin',
+				log.data,
+				log.topics
+			)
+			this.data.unshift({
+				buyer: result['buyer'],
+				cid: result['cid'],
+				cidKey: result['cidKey'],
+				operation: result['operation']
+			})
+		})
+	}
+
+	async filterEvents() {
+		const provider = new providers.Web3Provider(window.ethereum as any)
+
+		const storageManager = new Contract(
+			StorageManager.address,
+			StorageManager.abi
+		)
+		const filters = storageManager.filters.Pin()
+		const block = await provider.getBlock('latest')
+		const logs = await provider.getLogs({
+			...filters,
+			fromBlock: block.number - 900,
+			toBlock: block.number
+		})
+		const storageInterface = new utils.Interface(StorageManager.abi)
+
+		for (let log of logs) {
+			const result = storageInterface.decodeEventLog(
+				'Pin',
+				log.data,
+				log.topics
+			)
+			this.data.unshift({
+				buyer: result['buyer'],
+				cid: result['cid'],
+				cidKey: result['cidKey'],
+				operation: result['operation']
+			})
 		}
 	}
 
@@ -103,6 +208,15 @@ export default class StorageOperation extends Vue {
 
 	disabledDate(current: moment.Moment) {
 		return current && current < moment().endOf('day')
+	}
+
+	formatCID(cid: string) {
+		const buf = Buffer.from(cid.substring(2), 'hex')
+		return buf.toString()
+	}
+
+	formatOperation(op: number) {
+		return op == 0 ? 'Add' : 'Remove'
 	}
 }
 </script>

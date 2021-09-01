@@ -1,18 +1,16 @@
 <template>
-	<div style="width:100%;">
-		<a-select
-			default-value="0"
-			@change="onResourceChanged"
+	<a-select
+		default-value="0"
+		@change="onResourceChanged"
+	>
+		<a-select-option
+			v-for="(resource, i) of resources"
+			:key="`${i}-${resource.deployment.address}`"
+			:value="`${i}`"
 		>
-			<a-select-option
-				v-for="(resource, i) of resources"
-				:key="`${i}-${resource.deployment.address}`"
-				:value="`${i}`"
-			>
-				{{ resource.name }} {{ resource.deployment.address }}
-			</a-select-option>
-		</a-select>
-	</div>
+			{{ resource.name }} {{ resource.deployment.address }}
+		</a-select-option>
+	</a-select>
 </template>
 
 <script lang="ts">

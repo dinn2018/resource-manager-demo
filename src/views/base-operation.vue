@@ -1,9 +1,6 @@
 <template>
 	<div style="width:100%;">
-		<a-form
-			:label-col="{ span: 5 }"
-			:wrapper-col="{ span: 12 }"
-		>
+		<a-form>
 			<a-form-item label="Resource">
 				<Resources @onResourceChanged="onResourceChanged" />
 			</a-form-item>

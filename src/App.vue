@@ -5,7 +5,6 @@
 				:default-selected-keys="['1']"
 				:default-open-keys="['sub1']"
 				mode="inline"
-				theme="dark"
 			>
 				<a-menu-item key="0">
 					<a-button
@@ -47,8 +46,8 @@ export default class App extends Vue {
 	index = 0
 	account = ''
 
-	async created() {
-		// await this.connect()
+	created() {
+		this.connect()
 	}
 
 	async connect() {
