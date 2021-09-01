@@ -1,7 +1,6 @@
 import { Vue, Component } from 'vue-property-decorator'
 import { utils } from 'ethers'
 import { isNetworkSupported } from '@/utils'
-import { UPDATE_ACCOUNT, UPDATE_CHAINID } from '@/store'
 
 @Component
 export default class ETHMixin extends Vue {
