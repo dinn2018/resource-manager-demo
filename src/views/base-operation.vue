@@ -14,24 +14,13 @@
 							<a-form-item label="Buyer">
 								<a-input v-model="buyer" />
 							</a-form-item>
-							<a-form-item label="Amount">
-								<a-input v-model="amount" />
-							</a-form-item>
 							<a-form-item>
 								<a-button
 									type="primary"
 									html-type="submit"
-									@click="spend"
+									@click="spendStorage"
 								>
-									Spend
-								</a-button>
-								<a-button
-									style="margin-left:8px;"
-									type="primary"
-									html-type="submit"
-									@click="spendRollUp"
-								>
-									SpendRollUp
+									Spend Storage
 								</a-button>
 							</a-form-item>
 						</a-form>
@@ -97,24 +86,9 @@ export default class BaseOperation extends Vue {
 		this.resource = resource
 	}
 
-	async spend() {
+	async spendStorage() {
 		try {
-			await this.sendTransaction(ResourceManager, 'spend', [
-				this.resource.address,
-				this.buyer,
-				this.amount
-			])
-		} catch (e) {
-			this.$message.error(JSON.stringify(e))
-		}
-	}
-
-	async spendRollUp() {
-		try {
-			await this.sendTransaction(ResourceManager, 'spendRollUp', [
-				this.resource.address,
-				this.buyer
-			])
+			await this.sendTransaction(ResourceManager, 'spendStorage', [this.buyer])
 		} catch (e) {
 			this.$message.error(JSON.stringify(e))
 		}

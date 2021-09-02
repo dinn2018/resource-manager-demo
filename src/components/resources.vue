@@ -15,27 +15,22 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import InternalSwapResourceERC20 from '@/abi/InternalSwapResourceERC20.json'
-import BuyBackResource from '@/abi/BuyBackResource.json'
+import StorageWithDeadline from '@/abi/StorageWithDeadline.json'
 import SimpleResourceERC20 from '@/abi/SimpleResourceERC20.json'
 import SimpleResourceETH from '@/abi/SimpleResourceETH.json'
 
-export interface ResourceBalance {
+export interface StorageBalance {
 	total: number
 	left: number
-	spent: number
+	deadline: number
 }
 
 @Component
 export default class Resources extends Vue {
 	resources = [
 		{
-			name: 'BuyBackResource',
-			deployment: BuyBackResource
-		},
-		{
-			name: 'InternalSwapResourceERC20',
-			deployment: InternalSwapResourceERC20
+			name: 'StorageWithDeadline',
+			deployment: StorageWithDeadline
 		},
 		{
 			name: 'SimpleResourceERC20',
@@ -46,6 +41,7 @@ export default class Resources extends Vue {
 			deployment: SimpleResourceETH
 		}
 	]
+
 	async created() {
 		this.$emit('onResourceChanged', this.resources[0].deployment)
 	}

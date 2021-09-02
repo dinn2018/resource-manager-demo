@@ -14,12 +14,8 @@
 							<a-form-item label="CID">
 								<a-input v-model="cid" />
 							</a-form-item>
-							<a-form-item label="Deadline">
-								<a-date-picker
-									:disabled-date="disabledDate"
-									placeholder="Select date"
-									@change="deadlineChanged"
-								/>
+							<a-form-item label="Size">
+								<a-input v-model="size" />
 							</a-form-item>
 							<a-form-item>
 								<a-button
@@ -70,15 +66,16 @@ import { Component, Vue } from 'vue-property-decorator'
 import { Contract, utils, providers } from 'ethers'
 
 import Resources from '@/components/resources.vue'
-import StorageManager from '@/abi/StorageManager.json'
-import moment from 'moment'
+import ResourceManager from '@/abi/ResourceManager.json'
 
 interface PinLog {
 	buyer: string
 	cid: string
 	cidKey: string
 	operation: number
+	size: number
 }
+
 @Component({
 	components: {
 		Resources
@@ -87,7 +84,8 @@ interface PinLog {
 export default class StorageOperation extends Vue {
 	buyer = ''
 	cid = ''
-	deadline = 0
+
+	size = 0
 
 	txHash = ''
 	proof = ''
@@ -99,23 +97,33 @@ export default class StorageOperation extends Vue {
 			fixed: 'left'
 		},
 		{
-			title: 'CID',
-			dataIndex: 'cid',
-			scopedSlots: { customRender: 'cid' }
+			title: 'Operation',
+			dataIndex: 'operation',
+			scopedSlots: { customRender: 'operation' }
 		},
 		{
 			title: 'CIDKey',
 			dataIndex: 'cidKey'
 		},
 		{
-			title: 'Operation',
-			dataIndex: 'operation',
-			fixed: 'right',
-			scopedSlots: { customRender: 'operation' }
+			title: 'CID',
+			dataIndex: 'cid',
+			scopedSlots: { customRender: 'cid' }
+		},
+		{
+			title: 'Size',
+			dataIndex: 'size',
+			fixed: 'right'
 		}
 	]
 
 	data: PinLog[] = []
+
+	resourceManagerInterface = new utils.Interface(ResourceManager.abi)
+	resourceManagerContract = new Contract(
+		ResourceManager.address,
+		ResourceManager.abi
+	)
 
 	async created() {
 		this.buyer = await this.getAccount()
@@ -126,10 +134,10 @@ export default class StorageOperation extends Vue {
 	async pinAdd() {
 		try {
 			const buf = Buffer.from(this.cid)
-			await this.sendTransaction(StorageManager, 'pinAdd', [
+			await this.sendTransaction(ResourceManager, 'pinAdd', [
 				this.buyer,
 				buf,
-				this.deadline
+				this.size
 			])
 		} catch (e) {
 			this.$message.error(JSON.stringify(e))
@@ -138,25 +146,9 @@ export default class StorageOperation extends Vue {
 
 	async subscribePin() {
 		const provider = new providers.Web3Provider(window.ethereum as any)
-		const storageManager = new Contract(
-			StorageManager.address,
-			StorageManager.abi
-		)
-		const filters = storageManager.filters.Pin()
-		const storageInterface = new utils.Interface(StorageManager.abi)
-
+		const filters = this.resourceManagerContract.filters.Pin()
 		provider.on(filters, log => {
-			const result = storageInterface.decodeEventLog(
-				'Pin',
-				log.data,
-				log.topics
-			)
-			this.data.unshift({
-				buyer: result['buyer'],
-				cid: result['cid'],
-				cidKey: result['cidKey'],
-				operation: result['operation']
-			})
+			this.addLog(log)
 		})
 	}
 
@@ -164,8 +156,8 @@ export default class StorageOperation extends Vue {
 		const provider = new providers.Web3Provider(window.ethereum as any)
 
 		const storageManager = new Contract(
-			StorageManager.address,
-			StorageManager.abi
+			ResourceManager.address,
+			ResourceManager.abi
 		)
 		const filters = storageManager.filters.Pin()
 		const block = await provider.getBlock('latest')
@@ -174,38 +166,35 @@ export default class StorageOperation extends Vue {
 			fromBlock: block.number - 900,
 			toBlock: block.number
 		})
-		const storageInterface = new utils.Interface(StorageManager.abi)
+		logs.forEach(log => this.addLog(log))
+	}
 
-		for (let log of logs) {
-			const result = storageInterface.decodeEventLog(
-				'Pin',
-				log.data,
-				log.topics
-			)
-			this.data.unshift({
-				buyer: result['buyer'],
-				cid: result['cid'],
-				cidKey: result['cidKey'],
-				operation: result['operation']
-			})
-		}
+	addLog(log: providers.Log) {
+		const result = this.resourceManagerInterface.decodeEventLog(
+			'Pin',
+			log.data,
+			log.topics
+		)
+		console.log(result)
+		this.data.unshift({
+			buyer: result['buyer'],
+			cid: result['cid'],
+			cidKey: result['cidKey'],
+			operation: result['operation'],
+			size: result['size'].toString()
+		})
 	}
 
 	async pinRemove() {
 		try {
 			const buf = Buffer.from(this.cid)
-			await this.sendTransaction(StorageManager, 'pinRemove', [this.buyer, buf])
+			await this.sendTransaction(ResourceManager, 'pinRemove', [
+				this.buyer,
+				buf
+			])
 		} catch (e) {
 			this.$message.error(JSON.stringify(e))
 		}
-	}
-
-	deadlineChanged(date: moment.Moment) {
-		this.deadline = date.unix()
-	}
-
-	disabledDate(current: moment.Moment) {
-		return current && current < moment().endOf('day')
 	}
 
 	formatCID(cid: string) {

@@ -7,9 +7,12 @@
 			<a-form-item>
 				<a-card :bordered="true">
 					<div class="calculation-card">
-						<div>Resource balances total: {{ balances.total }}</div>
-						<div>Resource balances left: {{ balances.left }}</div>
-						<div>Resource balances spent: {{ balances.spent }}</div>
+						<div>storage balances total: {{ balances.total }}</div>
+						<div>storage balances left: {{ balances.left }}</div>
+						<div>
+							storage balances deadline:
+							{{ new Date(balances.deadline).toString() }}
+						</div>
 					</div>
 				</a-card>
 			</a-form-item>
@@ -19,7 +22,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import Resources, { ResourceBalance } from '@/components/resources.vue'
+import Resources, { StorageBalance } from '@/components/resources.vue'
 import ResourceManager from '@/abi/ResourceManager.json'
 
 @Component({
@@ -30,10 +33,10 @@ import ResourceManager from '@/abi/ResourceManager.json'
 export default class Statistics extends Vue {
 	resource: Deployment = { address: '', abi: [] }
 
-	balances: ResourceBalance = {
+	balances: StorageBalance = {
 		total: 0,
 		left: 0,
-		spent: 0
+		deadline: 0
 	}
 
 	async onResourceChanged(resource: Deployment) {
@@ -43,14 +46,13 @@ export default class Statistics extends Vue {
 
 	async getBalance() {
 		const account = await this.getAccount()
-		const result = await this.call(ResourceManager, 'balances', [
-			this.resource.address,
+		const result = await this.call(ResourceManager, 'storageBalances', [
 			account
 		])
 		this.balances = {
-			total: result[0].toString(),
-			left: result[1].toString(),
-			spent: result[2].toString()
+			total: result[0],
+			left: result[1],
+			deadline: result[2] * 1000
 		}
 	}
 }
