@@ -84,9 +84,7 @@ interface PinLog {
 export default class StorageOperation extends Vue {
 	buyer = ''
 	cid = ''
-
 	size = 0
-
 	txHash = ''
 	proof = ''
 
@@ -147,6 +145,7 @@ export default class StorageOperation extends Vue {
 	async subscribePin() {
 		const provider = new providers.Web3Provider(window.ethereum as any)
 		const filters = this.resourceManagerContract.filters.Pin()
+		console.log('filters', filters)
 		provider.on(filters, log => {
 			this.addLog(log)
 		})

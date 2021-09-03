@@ -87,7 +87,7 @@ export default class App extends Vue {
 
 		if (!isNetworkSupported(window.ethereum.chainId)) {
 			return this.$message.error(
-				'Please MetaMask change your network to `Goerli`.'
+				'Please MetaMask change your network to `Mumbai`.'
 			)
 		}
 
