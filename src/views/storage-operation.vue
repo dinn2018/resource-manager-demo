@@ -54,7 +54,6 @@
 					:data-source="logData"
 					:pagination="false"
 				/>
-				</a-table>
 			</a-form-item>
 		</a-form>
 	</div>
