@@ -168,7 +168,7 @@ export default class StorageOperation extends Vue {
 		const limit =
 			this.totalCID - offset > pageSize ? pageSize : this.totalCID - offset
 		try {
-			const ranged = await this.call(ResourceManager, 'rangeOf', [
+			const ranged = await this.call(ResourceManager, 'getCIDs', [
 				this.buyer,
 				offset,
 				limit

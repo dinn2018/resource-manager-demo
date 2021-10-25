@@ -15,6 +15,18 @@
 						</div>
 					</div>
 				</a-card>
+				<a-table
+					:columns="accountsColumns"
+					:data-source="accounts"
+					:pagination="false"
+				/>
+				<a-pagination
+					v-model="page"
+					show-less-items
+					:total="totalAccounts"
+					:page-size.sync="pageSize"
+					@change="onPageChange"
+				/>
 			</a-form-item>
 		</a-form>
 	</div>
@@ -31,12 +43,28 @@ import ResourceManager from '@/abi/ResourceManager.json'
 	}
 })
 export default class Statistics extends Vue {
+	pageSize = 10
+	page = 1
+	totalAccounts = 0
+	accounts: string[] = []
+
+	accountsColumns = [
+		{
+			title: 'Accounts'
+		}
+	]
+
 	resource: Deployment = { address: '', abi: [] }
 
 	balances: StorageBalance = {
 		total: 0,
 		left: 0,
 		deadline: 0
+	}
+
+	async created() {
+		await this.getAccountsLength()
+		await this.getAccounts()
 	}
 
 	async onResourceChanged(resource: Deployment) {
@@ -54,6 +82,33 @@ export default class Statistics extends Vue {
 			left: result[1],
 			deadline: result[2] * 1000
 		}
+	}
+
+	async getAccountsLength() {
+		const result = await this.call(ResourceManager, 'accountsLength')
+		this.totalAccounts = parseInt(result[0].toString())
+	}
+
+	async getAccounts() {
+		const pageSize = this.pageSize
+		const offset = (this.page - 1) * pageSize
+		const limit =
+			this.totalAccounts - offset > pageSize
+				? pageSize
+				: this.totalAccounts - offset
+		try {
+			const ranged = await this.call(ResourceManager, 'getAccounts', [
+				offset,
+				limit
+			])
+			this.accounts = ranged
+		} catch (e) {
+			this.$message.error(JSON.stringify(e))
+		}
+	}
+
+	onPageChange() {
+		this.getAccounts()
 	}
 }
 </script>
