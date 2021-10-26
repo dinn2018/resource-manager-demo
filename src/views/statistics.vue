@@ -50,7 +50,8 @@ export default class Statistics extends Vue {
 
 	accountsColumns = [
 		{
-			title: 'Accounts'
+			title: 'Accounts',
+			dataIndex: 'address'
 		}
 	]
 
@@ -101,7 +102,9 @@ export default class Statistics extends Vue {
 				offset,
 				limit
 			])
-			this.accounts = ranged
+			this.accounts = ranged[0].map((account: any) => {
+				return { address: account }
+			})
 		} catch (e) {
 			this.$message.error(JSON.stringify(e))
 		}
