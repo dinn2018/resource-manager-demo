@@ -1,9 +1,6 @@
 <template>
 	<div style="width:100%;">
 		<a-form>
-			<a-form-item label="Resource">
-				<Resources @onResourceChanged="onResourceChanged" />
-			</a-form-item>
 			<a-form-item>
 				<a-card :bordered="true">
 					<div class="calculation-card">
@@ -34,14 +31,15 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import Resources, { StorageBalance } from '@/components/resources.vue'
 import ResourceManager from '@/abi/ResourceManager.json'
 
-@Component({
-	components: {
-		Resources
-	}
-})
+interface StorageBalance {
+	total: number
+	left: number
+	deadline: number
+}
+
+@Component
 export default class Statistics extends Vue {
 	pageSize = 10
 	page = 1
@@ -66,6 +64,7 @@ export default class Statistics extends Vue {
 	async created() {
 		await this.getAccountsLength()
 		await this.getAccounts()
+		await this.getBalance()
 	}
 
 	async onResourceChanged(resource: Deployment) {

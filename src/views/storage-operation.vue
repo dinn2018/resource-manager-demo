@@ -8,8 +8,8 @@
 						style="height:330px;"
 					>
 						<a-form>
-							<a-form-item label="Buyer">
-								<a-input v-model="buyer" />
+							<a-form-item label="To">
+								<a-input v-model="to" />
 							</a-form-item>
 							<a-form-item label="CID">
 								<a-input v-model="cid" />
@@ -62,12 +62,10 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 import { Contract, utils, providers } from 'ethers'
-
-import Resources from '@/components/resources.vue'
 import ResourceManager from '@/abi/ResourceManager.json'
 
 interface PinLog {
-	buyer: string
+	to: string
 	cid: string
 	cidKey: string
 	operation: string
@@ -79,18 +77,14 @@ interface CID {
 	cid: string
 }
 
-@Component({
-	components: {
-		Resources
-	}
-})
+@Component
 export default class StorageOperation extends Vue {
 	pageSize = 10
 	page = 1
 	totalCID = 0
 	cids: CID[] = []
 
-	buyer = ''
+	to = ''
 	cid = ''
 	size = 0
 	txHash = ''
@@ -110,8 +104,8 @@ export default class StorageOperation extends Vue {
 
 	logColumns = [
 		{
-			title: 'Buyer',
-			dataIndex: 'buyer',
+			title: 'to',
+			dataIndex: 'to',
 			fixed: 'left'
 		},
 		{
@@ -142,7 +136,7 @@ export default class StorageOperation extends Vue {
 	)
 
 	async created() {
-		this.buyer = await this.getAccount()
+		this.to = await this.getAccount()
 		await this.refreshCIDs()
 		await this.filterEvents()
 		this.subscribePin()
@@ -155,7 +149,7 @@ export default class StorageOperation extends Vue {
 
 	async getCIDLength() {
 		try {
-			const total = await this.call(ResourceManager, 'cidLength', [this.buyer])
+			const total = await this.call(ResourceManager, 'cidLength', [this.to])
 			this.totalCID = parseInt(total.toString())
 		} catch (e) {
 			this.$message.error(JSON.stringify(e))
@@ -169,7 +163,7 @@ export default class StorageOperation extends Vue {
 			this.totalCID - offset > pageSize ? pageSize : this.totalCID - offset
 		try {
 			const ranged = await this.call(ResourceManager, 'getCIDs', [
-				this.buyer,
+				this.to,
 				offset,
 				limit
 			])
@@ -185,7 +179,7 @@ export default class StorageOperation extends Vue {
 		try {
 			const buf = Buffer.from(this.cid)
 			await this.sendTransaction(ResourceManager, 'pinAdd', [
-				this.buyer,
+				this.to,
 				buf,
 				this.size
 			])
@@ -197,10 +191,7 @@ export default class StorageOperation extends Vue {
 	async pinRemove() {
 		try {
 			const buf = Buffer.from(this.cid)
-			await this.sendTransaction(ResourceManager, 'pinRemove', [
-				this.buyer,
-				buf
-			])
+			await this.sendTransaction(ResourceManager, 'pinRemove', [this.to, buf])
 		} catch (e) {
 			this.$message.error(JSON.stringify(e))
 		}
@@ -238,7 +229,7 @@ export default class StorageOperation extends Vue {
 			log.topics
 		)
 		this.logData.unshift({
-			buyer: result['buyer'],
+			to: result['to'],
 			cid: this.formatCID(result['cid']),
 			cidKey: result['cidKey'],
 			operation: this.formatOperation(result['operation']),

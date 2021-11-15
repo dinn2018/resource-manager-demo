@@ -35,10 +35,6 @@
 					<router-link to="/" />
 				</a-menu-item>
 				<a-menu-item key="2">
-					<span>Base Operation</span>
-					<router-link to="/base-operation" />
-				</a-menu-item>
-				<a-menu-item key="3">
 					<span>Storage Operation</span>
 					<router-link to="/storage-operation" />
 				</a-menu-item>

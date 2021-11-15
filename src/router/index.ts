@@ -9,11 +9,6 @@ const routes: RouteConfig[] = [
 		component: () => import('../views/statistics.vue'),
 	},
 	{
-		path: '/base-operation',
-		name: 'base-operation',
-		component: () => import('../views/base-operation.vue'),
-	},
-	{
 		path: '/storage-operation',
 		name: 'storage-operation',
 		component: () => import('../views/storage-operation.vue'),
