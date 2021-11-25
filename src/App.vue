@@ -13,13 +13,13 @@
 					Connected: {{ formatAccount }} Network: {{ network }}
 					<a-icon
 						v-if="isNetworkSupported"
-						style="color:green;"
+						style="color: green"
 						type="check-circle"
 						theme="filled"
 					/>
 					<a-icon
 						v-else
-						style="color:red;"
+						style="color: red"
 						type="warning"
 						theme="filled"
 					/>
@@ -31,17 +31,13 @@
 				mode="inline"
 			>
 				<a-menu-item key="1">
-					<span>Statistics</span>
+					<span>Home</span>
 					<router-link to="/" />
-				</a-menu-item>
-				<a-menu-item key="2">
-					<span>Storage Operation</span>
-					<router-link to="/storage-operation" />
 				</a-menu-item>
 			</a-menu>
 		</div>
 		<keep-alive>
-			<router-view style="margin:8px;" />
+			<router-view style="margin-left: 8px" />
 		</keep-alive>
 	</div>
 </template>
@@ -49,10 +45,12 @@
 import { Vue, Component } from 'vue-property-decorator'
 import { UPDATE_ACCOUNT, UPDATE_CHAINID } from '@/store'
 import { formatNetwork, isNetworkSupported } from '@/utils'
+import { provider } from '@/factories'
 
 @Component
 export default class App extends Vue {
-	created() {
+	async created() {
+		await this.checkState()
 		this.listen()
 	}
 
@@ -71,6 +69,16 @@ export default class App extends Vue {
 		return formatNetwork(this.$store.state.chainId)
 	}
 
+	async checkState() {
+		if (window.ethereum) {
+			const signer = provider.getSigner()
+			const account = await signer.getAddress()
+			const chainId = await signer.getChainId()
+			this.$store.commit(UPDATE_ACCOUNT, account)
+			this.$store.commit(UPDATE_CHAINID, chainId)
+		}
+	}
+
 	async connect() {
 		if (!window.ethereum) {
 			return this.$message.warn('Please install MetaMask to use this app.')
@@ -81,7 +89,7 @@ export default class App extends Vue {
 			return this.$message.warn('Metamask has been locked, please unlock it.')
 		}
 
-		if (!isNetworkSupported(window.ethereum.chainId)) {
+		if (!isNetworkSupported(parseInt(window.ethereum.chainId))) {
 			return this.$message.error(
 				'Please MetaMask change your network to `Mumbai`.'
 			)
@@ -95,14 +103,13 @@ export default class App extends Vue {
 				method: 'eth_requestAccounts'
 			})
 		}
-
-		this.$store.commit(UPDATE_ACCOUNT, accounts[0])
-		this.$store.commit(UPDATE_CHAINID, window.ethereum.chainId)
+		window.location.reload()
 	}
 
 	listen() {
 		window.ethereum.on('accountsChanged', accounts => {
 			this.$store.commit(UPDATE_ACCOUNT, accounts[0])
+			window.location.reload()
 		})
 
 		window.ethereum.on('chainChanged', chainId => {

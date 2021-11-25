@@ -25,25 +25,25 @@ export const defaultDeadline = () => {
 	return BigNumber.from(Math.floor(Date.now() / 1000 + 100000))
 }
 
-export const formatNetwork = (chainId: string) => {
+export const formatNetwork = (chainId: number) => {
 	switch (chainId) {
-		case '0x1':
+		case 0x1:
 			return 'Mainnet'
-		case '0x3':
+		case 0x3:
 			return 'Ropsten'
-		case '0x4':
+		case 0x4:
 			return 'Rinkeby'
-		case '0x5':
+		case 0x5:
 			return 'Goerli'
-		case '0x2a':
+		case 0x2a:
 			return 'Kovan'
-		case '0x13881':
+		case 0x13881:
 			return 'Mumbai'
 		default:
 			return 'Unknown'
 	}
 }
 
-export const isNetworkSupported = (chainId: string) => {
-	return chainId == '0x13881'
+export const isNetworkSupported = (chainId: number) => {
+	return chainId == 0x13881
 }

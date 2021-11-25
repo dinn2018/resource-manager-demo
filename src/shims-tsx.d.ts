@@ -1,6 +1,22 @@
 import Vue, { VNode } from 'vue'
 
 declare global {
+
+	namespace Entity {
+		export interface Balance {
+			to: string
+			total: string
+			cost: string
+			expiration: string
+		}
+
+		export interface CID {
+			size: number
+			data: string
+		}
+
+	}
+
 	namespace JSX {
 		// tslint:disable no-empty-interface
 		interface Element extends VNode { }

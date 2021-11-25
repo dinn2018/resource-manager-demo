@@ -5,13 +5,8 @@ Vue.use(VueRouter)
 const routes: RouteConfig[] = [
 	{
 		path: '/',
-		name: 'statistics',
-		component: () => import('../views/statistics.vue'),
-	},
-	{
-		path: '/storage-operation',
-		name: 'storage-operation',
-		component: () => import('../views/storage-operation.vue'),
+		name: 'Home',
+		component: () => import('../views/Home.vue'),
 	}
 ]
 

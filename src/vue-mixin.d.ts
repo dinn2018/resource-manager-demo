@@ -14,19 +14,7 @@ declare module 'vue/types/vue' {
 		destroyed(): void
 		$router: VueRouter
 
-		call(
-			deployment: Deployment,
-			functionName: string,
-			args?: any[],
-			options?: CallOption
-		): Promise<any>
-
-		sendTransaction(
-			deployment: Deployment,
-			functionName: string,
-			args?: any[],
-			options?: CallOption
-		): Promise<any>
+		popError(e): void
 
 		getBalance(options?: CallOption): Promise<any>
 		getAccount(): Promise<string>
