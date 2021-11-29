@@ -45,6 +45,12 @@
 				/>
 			</a-form>
 		</a-modal>
+		<CIDUpdateModal
+			:balance="selectedAccount"
+			:cid="selectedCID"
+			:show="showCIDUpdateModal"
+			@close="closeCIDUpdateModal"
+		/>
 	</div>
 </template>
 
@@ -52,10 +58,25 @@
 import { Component, Vue, Prop, Emit, Watch } from 'vue-property-decorator'
 import { ResourceManager, provider, ResourceManagerAddress } from '@/factories'
 import { BigNumber } from 'ethers'
+import CIDUpdateModal from '@/components/CIDUpdateModal.vue'
 
-@Component
+@Component({
+	components: {
+		CIDUpdateModal
+	}
+})
 export default class CIDListModal extends Vue {
 	visible = false
+
+	selectedAccount: Entity.Balance = {
+		to: '',
+		total: '',
+		cost: '',
+		expiration: ''
+	}
+	selectedCID: Entity.CID = { size: 0, data: '' }
+
+	showCIDUpdateModal = false
 
 	removeLoading = false
 	updateLoading = false
@@ -76,7 +97,6 @@ export default class CIDListModal extends Vue {
 	page = 1
 	totalCID = 0
 	cids: Entity.CID[] = []
-
 	cost: BigNumber = BigNumber.from('0')
 
 	cidColumns = [
@@ -140,31 +160,6 @@ export default class CIDListModal extends Vue {
 		}
 	}
 
-	async updateCID(record: Entity.CID) {
-		try {
-			this.opCID = record
-			this.updateLoading = true
-			const data = ResourceManager.interface.encodeFunctionData('update', [
-				this.balance.to,
-				record.data,
-				1000
-			])
-			const signer = provider.getSigner()
-			const from = await signer.getAddress()
-			const tx = await signer.sendTransaction({
-				from,
-				to: ResourceManagerAddress,
-				data
-			})
-			await tx.wait()
-			await this.refreshCIDs()
-		} catch (e) {
-			this.popError(e)
-		} finally {
-			this.updateLoading = false
-		}
-	}
-
 	async refreshCIDs() {
 		await this.getCIDLength()
 		await this.getCIDs()
@@ -192,6 +187,17 @@ export default class CIDListModal extends Vue {
 		} catch (e) {
 			this.$message.error(JSON.stringify(e))
 		}
+	}
+
+	async updateCID(record: Entity.CID) {
+		this.selectedCID = record
+		this.selectedAccount = this.balance
+		this.showCIDUpdateModal = true
+	}
+
+	closeCIDUpdateModal() {
+		this.showCIDUpdateModal = false
+		this.refreshCIDs()
 	}
 
 	@Emit()
