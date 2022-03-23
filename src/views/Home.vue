@@ -112,6 +112,7 @@ export default class Home extends Vue {
 
 	async getBalances() {
 		const pageSize = this.pageSize
+		console.log(pageSize)
 		const offset = (this.page - 1) * pageSize
 		const limit =
 			this.totalAccounts - offset > pageSize
